@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Test Files">
+      <UniqueIdentifier>{43b78e16-180c-4789-9a27-d6e76ff67349}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Test Files\Data">
+      <UniqueIdentifier>{a0a7e76d-58a1-4ac8-9019-5ad1fc56ba3b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\utf_utils.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test\llvm_convert_utf.h">
+      <Filter>Test Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test\av_utf8.h">
+      <Filter>Test Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test\test_main.h">
+      <Filter>Test Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test\boost_utf8.hpp">
+      <Filter>Test Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test\boost_utf8_config.hpp">
+      <Filter>Test Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test\hoehrmann.h">
+      <Filter>Test Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\utf_utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test\test_main.cpp">
+      <Filter>Test Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test\av_utf8.c">
+      <Filter>Test Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test\llvm_convert_utf.c">
+      <Filter>Test Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test\test_conversions_16.cpp">
+      <Filter>Test Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test\test_conversions_32.cpp">
+      <Filter>Test Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test\test_basics.cpp">
+      <Filter>Test Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test\hoehrmann.cpp">
+      <Filter>Test Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="CMakeLists.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="test\data\portuguese_wiki.txt">
+      <Filter>Test Files\Data</Filter>
+    </Text>
+    <Text Include="test\data\russian_wiki.txt">
+      <Filter>Test Files\Data</Filter>
+    </Text>
+    <Text Include="test\data\stress_test_0.txt">
+      <Filter>Test Files\Data</Filter>
+    </Text>
+    <Text Include="test\data\stress_test_1.txt">
+      <Filter>Test Files\Data</Filter>
+    </Text>
+    <Text Include="test\data\stress_test_2.txt">
+      <Filter>Test Files\Data</Filter>
+    </Text>
+    <Text Include="test\data\swedish_wiki.txt">
+      <Filter>Test Files\Data</Filter>
+    </Text>
+    <Text Include="test\data\UTF-8-test.txt">
+      <Filter>Test Files\Data</Filter>
+    </Text>
+    <Text Include="test\data\z1_ascii.txt">
+      <Filter>Test Files\Data</Filter>
+    </Text>
+    <Text Include="test\data\z1_kosme.txt">
+      <Filter>Test Files\Data</Filter>
+    </Text>
+    <Text Include="test\data\chinese_wiki.txt">
+      <Filter>Test Files\Data</Filter>
+    </Text>
+    <Text Include="test\data\english_wiki.txt">
+      <Filter>Test Files\Data</Filter>
+    </Text>
+    <Text Include="test\data\hindi_wiki.txt">
+      <Filter>Test Files\Data</Filter>
+    </Text>
+    <Text Include="test\data\hindi_wiki_in_english.txt">
+      <Filter>Test Files\Data</Filter>
+    </Text>
+    <Text Include="test\data\hindi_wiki_in_russian.txt">
+      <Filter>Test Files\Data</Filter>
+    </Text>
+    <Text Include="test\data\japanese_wiki.txt">
+      <Filter>Test Files\Data</Filter>
+    </Text>
+    <Text Include="test\data\kermit.txt">
+      <Filter>Test Files\Data</Filter>
+    </Text>
+    <Text Include="test\data\korean_wiki.txt">
+      <Filter>Test Files\Data</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="run_cmake.sh">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="setup_cmake_builds.sh">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include=".gitignore">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>
