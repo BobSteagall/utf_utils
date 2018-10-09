@@ -9,8 +9,8 @@ set(Sources
 
     test/av_utf8.c
     test/av_utf8.h
-	test/boost_utf8.hpp
-	test/boost_utf8_config.hpp
+    test/boost_utf8.hpp
+    test/boost_utf8_config.hpp
     test/hoehrmann.cpp
     test/hoehrmann.h
     test/llvm_convert_utf.c

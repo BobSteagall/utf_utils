@@ -32,8 +32,8 @@ To build and run: clone the repo, run the provided handy-dandy CMake setup scrip
 
 ```
     $ cd <some_work_dir>
-    $ git clone https://github.com/BobSteagall/utf_utils_private.git
-    $ cd utf_utils_private
+    $ git clone https://github.com/BobSteagall/utf_utils.git
+    $ cd utf_utils
     $ ./setup_cmake_builds.sh
     $
     $ cd build-release-gcc
@@ -63,15 +63,15 @@ To build: clone the repo, open the `UtfUtils.sln` solution file in the project r
 
 ```
     C:\blah_dir> cd <some_work_dir>
-    C:\some_work_dir> git clone https://github.com/BobSteagall/utf_utils_private.git
-    C:\some_word_dir> cd utf_utils_private
+    C:\some_work_dir> git clone https://github.com/BobSteagall/utf_utils.git
+    C:\some_word_dir> cd utf_utils
     [... build with VS ...]
 ```
 
 To run: open a Command Prompt window, PowerShell window, MinGW shell window, or Cygwin shell window and change directory to the project root.  From there, you can execute the test program with something like this (with Command Prompt):
 
 ```
-    C:\some_work_dir\utf_utils_private> x64\Release\UtfUtils.exe -dd test_data
+    C:\some_work_dir\utf_utils> build-win\x64\Release\utf_utils_test.exe -dd test_data
 ```
 
 NB: The repo contains a pre-built version of [libiconv](https://www.gnu.org/software/libiconv/) built with Visual Studio 2015 against the Windows 8.1 SDK.  It includes static libraries for Debug/Release configurations on x86/x64.  The test program uses these libraries as part of its benchmarking.  I've built and tested the test program with all four library configurations with VS2015/2017 on Windows 8.1/10.
@@ -93,4 +93,4 @@ Please let me know if you find any errors or problems, and as always, feedback a
 
 --Bob
 
-P.S. For the site where this and other C++ work will be discussed, see my blog [The State Machine](https://bobsteagall.com).
+P.S. For the site where this and my other C++ work will be discussed, see [The State Machine](https://bobsteagall.com).

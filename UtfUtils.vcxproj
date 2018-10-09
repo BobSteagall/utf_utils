@@ -75,14 +75,14 @@
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;$(ProjectDir)test\windows-iconv\lib\x86</LibraryPath>
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)build-win\$(PlatformShortName)\$(Configuration)\</OutDir>
-    <TargetName>utf_utils</TargetName>
+    <TargetName>utf_utils_test</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IntDir>$(SolutionDir)build-win\$(PlatformShortName)\$(Configuration)\</IntDir>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)src;$(ProjectDir)test;$(ProjectDir)test\windows-iconv\include</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(ProjectDir)test\windows-iconv\lib\x64</LibraryPath>
     <OutDir>$(SolutionDir)build-win\$(PlatformShortName)\$(Configuration)\</OutDir>
-    <TargetName>utf_utils</TargetName>
+    <TargetName>utf_utils_test</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -90,7 +90,7 @@
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)src;$(ProjectDir)test;$(ProjectDir)test\windows-iconv\include</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;$(ProjectDir)test\windows-iconv\lib\x86</LibraryPath>
     <OutDir>$(SolutionDir)build-win\$(PlatformShortName)\$(Configuration)\</OutDir>
-    <TargetName>utf_utils</TargetName>
+    <TargetName>utf_utils_test</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -98,7 +98,7 @@
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)src;$(ProjectDir)test;$(ProjectDir)test\windows-iconv\include</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(ProjectDir)test\windows-iconv\lib\x64</LibraryPath>
     <OutDir>$(SolutionDir)build-win\$(PlatformShortName)\$(Configuration)\</OutDir>
-    <TargetName>utf_utils</TargetName>
+    <TargetName>utf_utils_test</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
