@@ -9,7 +9,8 @@
 #ifndef KEWB_UNICODE_UTILS_H_DEFINED
 #define KEWB_UNICODE_UTILS_H_DEFINED
 
-//#include <cstdint>
+#include <cstddef>
+#include <cstdint>
 #include <string>
 
 //- Detect the compiler; only Clang, GCC, and Visual C++ are currently supported.
