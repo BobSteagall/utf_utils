@@ -97,7 +97,7 @@ Convert32_Codecvt(string const& src, size_t reps, u32string& dst)
     {
         dst = utf32conv.from_bytes(src);
     }
-    
+
     return (ptrdiff_t) dst.size();
 }
 
@@ -316,6 +316,24 @@ Convert32_KewbSse(string const& src, size_t reps, u32string& dst)
     return dstLen;
 }
 
+//--------------
+//
+ptrdiff_t
+Convert32_KewbAvx(string const& src, size_t reps, u32string& dst)
+{
+    char8_t const*  pSrcBuf = (char8_t const*) &src[0]; //- Pointer to source buffer
+    char8_t const*  pSrcEnd = pSrcBuf + src.size();     //- Pointer to end of source buffer
+    char32_t*       pDstBuf = &dst[0];                  //- Pointer to destination buffer
+    ptrdiff_t       dstLen  = 0;
+
+    for (uint64_t i = 0;  i < reps;  ++i)
+    {
+        dstLen = UtfUtils::AvxConvert(pSrcBuf, pSrcEnd, pDstBuf);
+    }
+
+    return dstLen;
+}
+
 //--------------------------------------------------------------------------------------------------
 //
 int64_t
@@ -453,6 +471,10 @@ TestAllConversions32(string const& fname, bool isFile, size_t repShift, bool tbl
         tdiff = TestOneConversion32(&Convert32_KewbSse, u8src, reps, u32answer, "kewb-sse");
         times.push_back(tdiff);
         algos.emplace_back("kewb-sse");
+
+        tdiff = TestOneConversion32(&Convert32_KewbAvx, u8src, reps, u32answer, "kewb-avx");
+        times.push_back(tdiff);
+        algos.emplace_back("kewb-avx");
     }
 
     return tuple<name_list, time_list>(algos, times);

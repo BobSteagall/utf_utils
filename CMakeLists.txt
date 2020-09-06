@@ -35,20 +35,22 @@ else()
     set(CMAKE_CXX_COMPILER g++)
 endif()
 
+set(AVX_FLAGS "-mavx512f -march=skylake-avx512")
+
 if(CMAKE_CXX_COMPILER STREQUAL clang++)
 
-    set(CMAKE_C_FLAGS_DEBUG   "-g -Wall -pedantic -Wextra")
-    set(CMAKE_CXX_FLAGS_DEBUG "-g -std=c++14 -Wall -pedantic -Wextra -Wno-unused-parameter")
+    set(CMAKE_C_FLAGS_DEBUG   "-g ${AVX_FLAGS} -Wall -pedantic -Wextra")
+    set(CMAKE_CXX_FLAGS_DEBUG "-g -std=c++17 -stdlib=libc++ ${AVX_FLAGS} -Wall -pedantic -Wextra -Wno-unused-parameter")
 
-    set(CMAKE_C_FLAGS_RELEASE   "-O3 -march=westmere -Wall -pedantic -Wextra")
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=westmere -std=c++14 -stdlib=libc++ -Wall -pedantic -Wextra -Wno-unused-parameter")
+    set(CMAKE_C_FLAGS_RELEASE   "-O3  ${AVX_FLAGS} -Wall -pedantic -Wextra")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -std=c++17 -stdlib=libc++ ${AVX_FLAGS} -Wall -pedantic -Wextra -Wno-unused-parameter")
 
 elseif(CMAKE_CXX_COMPILER STREQUAL g++)
 
-    set(CMAKE_C_FLAGS_DEBUG   "-g -Wall -pedantic")
-    set(CMAKE_CXX_FLAGS_DEBUG "-g -std=c++14 -Wall -pedantic -Wextra")
+    set(CMAKE_C_FLAGS_DEBUG   "-g ${AVX_FLAGS} -Wall -pedantic")
+    set(CMAKE_CXX_FLAGS_DEBUG "-g -std=c++17 ${AVX_FLAGS} -Wall -pedantic -Wextra")
 
-    set(CMAKE_C_FLAGS_RELEASE   "-O3 -march=westmere -Wall -pedantic")
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=westmere -std=c++14 -Wall -pedantic -Wextra")
+    set(CMAKE_C_FLAGS_RELEASE   "-O3  ${AVX_FLAGS} -Wall -pedantic")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -std=c++17 ${AVX_FLAGS} -Wall -pedantic -Wextra")
 
 endif()

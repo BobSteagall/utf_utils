@@ -326,7 +326,7 @@ UtfUtils::LookupTables const    UtfUtils::smTables =
     },
 
     //- Initialize the maTransitions member array.  This array implements a lookup table that,
-    //  given the current DFA state and an input code unit, indicates the next DFA state. 
+    //  given the current DFA state and an input code unit, indicates the next DFA state.
 	//
     //  ILL  ASC  CR1  CR2  CR3  L2A  L3A  L3B  L3C  L4A  L4B  L4C  CLASS/STATE
     //=========================================================================
@@ -508,6 +508,75 @@ UtfUtils::SseBigTableConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char32
         if (*pSrc < 0x80)
         {
             ConvertAsciiWithSse(pSrc, pDst);
+        }
+        else
+        {
+            if (AdvanceWithBigTable(pSrc, pSrcEnd, cdpt) != ERR)
+            {
+                *pDst++ = cdpt;
+            }
+            else
+            {
+                return -1;
+            }
+        }
+    }
+
+    while (pSrc < pSrcEnd)
+    {
+        if (*pSrc < 0x80)
+        {
+            *pDst++ = *pSrc++;
+        }
+        else
+        {
+            if (AdvanceWithBigTable(pSrc, pSrcEnd, cdpt) != ERR)
+            {
+                *pDst++ = cdpt;
+            }
+            else
+            {
+                return -1;
+            }
+        }
+    }
+
+    return pDst - pDstOrig;
+}
+
+//--------------------------------------------------------------------------------------------------
+/// \brief  Converts a sequence of UTF-8 code units to a sequence of UTF-32 code points.
+///
+/// \details
+///     This static member function reads an input sequence of UTF-8 code units and converts
+///     it to an output sequence of UTF-32 code points.  It uses the DFA to perform non-ascii
+///     code-unit sequence conversions, but optimizes by converting contiguous sequences of
+///     ASCII code units using SSE intrinsics.  It uses the `AdvanceWithBigTable` member
+///     function to read and convert input.
+///
+/// \param pSrc
+///     A non-null pointer defining the beginning of the code unit input range.
+/// \param pSrcEnd
+///     A non-null past-the-end pointer defining the end of the code unit input range.
+/// \param pDst
+///     A non-null pointer defining the beginning of the code point output range.
+///
+/// \returns
+///     If successful, the number of UTF-32 code points written; otherwise -1 is returned to
+///     indicate an error was encountered.
+//--------------------------------------------------------------------------------------------------
+//
+KEWB_ALIGN_FN std::ptrdiff_t
+UtfUtils::AvxBigTableConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char32_t* pDst) noexcept
+{
+    char32_t*   pDstOrig = pDst;
+    char32_t    cdpt;
+
+    while (pSrc < (pSrcEnd - sizeof(__m128i)))
+    {
+        if (*pSrc < 0x80)
+        {
+            ConvertAsciiWithAvx(pSrc, pDst);
         }
         else
         {
@@ -1122,7 +1191,8 @@ UtfUtils::ConvertWithTrace(char8_t const* pSrc, char8_t const* pSrcEnd, char16_t
 ///     A reference to a non-null pointer defining the start of the code point output range.
 //--------------------------------------------------------------------------------------------------
 //
-KEWB_FORCE_INLINE void
+KEWB_FORCE_INLINE
+void
 UtfUtils::ConvertAsciiWithSse(char8_t const*& pSrc, char32_t*& pDst) noexcept
 {
     __m128i     chunk, half, qrtr, zero;
@@ -1161,6 +1231,103 @@ UtfUtils::ConvertAsciiWithSse(char8_t const*& pSrc, char32_t*& pDst) noexcept
         pSrc += incr;
         pDst += incr;
     }
+}
+
+//--------------------------------------------------------------------------------------------------
+/// \brief  Converts a sequence of ASCII UTF-8 code units to a sequence of UTF-32 code points.
+///
+/// \details
+///     This static member function uses AVX512 intrinsics to convert a register of ASCII code
+///     units to four registers of equivalent UTF-32 code units.
+///
+/// \param pSrc
+///     A reference to a non-null pointer defining the start of the code unit input range.
+/// \param pDst
+///     A reference to a non-null pointer defining the start of the code point output range.
+//--------------------------------------------------------------------------------------------------
+//
+KEWB_FORCE_INLINE
+void
+UtfUtils::ConvertAsciiWithAvx(char8_t const*& pSrc, char32_t*& pDst) noexcept
+{
+    __m128i     chunk;
+    int32_t     mask, incr;
+
+    chunk = _mm_loadu_si128((__m128i const*) pSrc);     //- Load a register with 8-bit bytes
+    mask  = _mm_movemask_epi8(chunk);                   //- Determine which octets have high bit set
+#if 0
+    __m128i     half, qrtr, zero;
+    zero  = _mm_set1_epi8(0);                           //- Zero out the interleave register
+    half = _mm_unpacklo_epi8(chunk, zero);              //- Unpack bytes 0-7 into 16-bit words
+    qrtr = _mm_unpacklo_epi16(half, zero);              //- Unpack words 0-3 into 32-bit dwords
+    _mm_storeu_si128((__m128i*) pDst, qrtr);            //- Write to memory
+    qrtr = _mm_unpackhi_epi16(half, zero);              //- Unpack words 4-7 into 32-bit dwords
+    _mm_storeu_si128((__m128i*) (pDst + 4), qrtr);      //- Write to memory
+
+    half = _mm_unpackhi_epi8(chunk, zero);              //- Unpack bytes 8-15 into 16-bit words
+    qrtr = _mm_unpacklo_epi16(half, zero);              //- Unpack words 8-11 into 32-bit dwords
+    _mm_storeu_si128((__m128i*) (pDst + 8), qrtr);      //- Write to memory
+    qrtr = _mm_unpackhi_epi16(half, zero);              //- Unpack words 12-15 into 32-bit dwords
+    _mm_storeu_si128((__m128i*) (pDst + 12), qrtr);     //- Write to memory
+#else
+//    __m512i     full;
+//    full = _mm512_cvtepu8_epi32(chunk);                 //- Zero-extend the octets.
+//    _mm512_storeu_epi32(pDst, full);
+
+    __m256i     half;
+
+    half = _mm256_cvtepu8_epi32(chunk);
+    _mm256_storeu_epi32(pDst, half);
+    chunk = _mm_shuffle_epi32(chunk, _MM_SHUFFLE(1, 0, 3, 2));
+    half  = _mm256_cvtepu8_epi32(chunk);
+    _mm256_storeu_epi32(pDst + 8, half);
+
+#endif
+    //- If no bits were set in the mask, then all 16 code units were ASCII, and therefore
+    //  both pointers are advanced by 16.
+    //
+    if (mask == 0)
+    {
+        pSrc += 16;
+        pDst += 16;
+    }
+
+    //- Otherwise, the number of trailing (low-order) zero bits in the mask indicates the number
+    //  of ASCII code units starting from the lowest byte address.
+    else
+    {
+        incr  = GetTrailingZeros(mask);
+        pSrc += incr;
+        pDst += incr;
+    }
+/*
+    __m128i     chunk;
+    __m512i     full;
+    int32_t     mask, incr;
+
+    chunk = _mm_loadu_si128((__m128i const*) pSrc);     //- Load a register with 8-bit bytes
+    full  = _mm512_cvtepu8_epi32(chunk);                //- Zero-extend the octets.
+    _mm512_storeu_epi32(pDst, full);
+    mask  = _mm_movemask_epi8(chunk);                   //- Determine which octets have high bit set
+
+    //- If no bits were set in the mask, then all 16 code units were ASCII, and therefore
+    //  both pointers are advanced by 16.
+    //
+    if (mask == 0)
+    {
+        pSrc += 16;
+        pDst += 16;
+    }
+
+    //- Otherwise, the number of trailing (low-order) zero bits in the mask indicates the number
+    //  of ASCII code units starting from the lowest byte address.
+    else
+    {
+        incr  = GetTrailingZeros(mask);
+        pSrc += incr;
+        pDst += incr;
+    }
+*/
 }
 
 //--------------------------------------------------------------------------------------------------

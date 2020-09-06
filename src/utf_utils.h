@@ -108,6 +108,7 @@ class UtfUtils
     static  ptrdiff_t   BasicConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char32_t* pDst) noexcept;
     static  ptrdiff_t   FastConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char32_t* pDst) noexcept;
     static  ptrdiff_t   SseConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char32_t* pDst) noexcept;
+    static  ptrdiff_t   AvxConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char32_t* pDst) noexcept;
 
     static  ptrdiff_t   BasicConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char16_t* pDst) noexcept;
     static  ptrdiff_t   FastConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char16_t* pDst) noexcept;
@@ -118,7 +119,7 @@ class UtfUtils
     static  ptrdiff_t   BasicBigTableConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char32_t* pDst) noexcept;
     static  ptrdiff_t   FastBigTableConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char32_t* pDst) noexcept;
     static  ptrdiff_t   SseBigTableConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char32_t* pDst) noexcept;
-    static  ptrdiff_t   SseBigTableConvertX(char8_t const* pSrc, char8_t const* pSrcEnd, char32_t* pDst) noexcept;
+    static  ptrdiff_t   AvxBigTableConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char32_t* pDst) noexcept;
 
     static  ptrdiff_t   BasicBigTableConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char16_t* pDst) noexcept;
     static  ptrdiff_t   FastBigTableConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char16_t* pDst) noexcept;
@@ -205,8 +206,9 @@ class UtfUtils
     static  State   AdvanceWithTrace(char8_t const*& pSrc, char8_t const* pSrcEnd, char32_t& cdpt) noexcept;
 
     static  void    ConvertAsciiWithSse(char8_t const*& pSrc, char32_t*& pDst) noexcept;
-    static  int32_t ConvertAsciiWithSseX(char8_t const*& pSrc, char32_t*& pDst) noexcept;
+    static  void    ConvertAsciiWithAvx(char8_t const*& pSrc, char32_t*& pDst) noexcept;
     static  void    ConvertAsciiWithSse(char8_t const*& pSrc, char16_t*& pDst) noexcept;
+    static  void    ConvertAsciiWithAvx(char8_t const*& pSrc, char16_t*& pDst) noexcept;
     static  int32_t GetTrailingZeros(int32_t x) noexcept;
 
     static  void    PrintStateData(State curr, CharClass type, uint32_t unit, State next);
@@ -376,6 +378,27 @@ UtfUtils::SseConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char32_t* pDst
 }
 
 //--------------------------------------------------------------------------------------------------
+/// \brief  Converts a sequence of UTF-8 code units to a sequence of UTF-32 code points.
+///
+/// \param pSrc
+///     A non-null pointer defining the beginning of the code unit input range.
+/// \param pSrcEnd
+///     A non-null past-the-end pointer defining the end of the code unit input range.
+/// \param pDst
+///     A non-null pointer defining the beginning of the code point output range.
+///
+/// \returns
+///     If successful, the number of UTF-32 code points written; otherwise -1 is returned to
+///     indicate an error was encountered.
+//--------------------------------------------------------------------------------------------------
+//
+KEWB_FORCE_INLINE ptrdiff_t
+UtfUtils::AvxConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char32_t* pDst) noexcept
+{
+    return AvxBigTableConvert(pSrc, pSrcEnd, pDst);
+}
+
+//--------------------------------------------------------------------------------------------------
 /// \brief  Converts a sequence of UTF-8 code units to a sequence of UTF-16 code units.
 ///
 /// \param pSrc
@@ -516,7 +539,7 @@ UtfUtils::AdvanceWithSmallTable(char8_t const*& pSrc, char8_t const* const pSrcE
 
     unit = *pSrc++;                                         //- Cache the first code unit
     type = smTables.maOctetCategory[unit];                  //- Get the first code unit's character class
-    cdpt = smTables.maFirstOctetMask[type] & unit;          //- Apply the first octet mask 
+    cdpt = smTables.maFirstOctetMask[type] & unit;          //- Apply the first octet mask
     curr = smTables.maTransitions[type];                    //- Look up the second state
 
     while (curr > ERR)
