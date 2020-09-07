@@ -574,42 +574,32 @@ UtfUtils::AvxBigTableConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char32
 
     while (pSrc < (pSrcEnd - sizeof(__m128i)))
     {
-        if (pSrc[0] < 0x80  &&  pSrc[1] < 0x80)
+        if (*pSrc < 0x80)
         {
-#if 0
-            ConvertAsciiWithAvx(pSrc, pDst);
-#else
+            int32_t     mask, incr;
             __m128i     chunk;
             __m256i     half;
-            int32_t     mask, incr;
 
-            chunk = _mm_loadu_si128((__m128i const*) pSrc);     //- Load a register with 8-bit bytes
-            mask  = _mm_movemask_epi8(chunk);                   //- Determine which octets have high bit set
-
-            half = _mm256_cvtepu8_epi32(chunk);
+            chunk = _mm_loadu_si128((__m128i const*) pSrc);
+            half  = _mm256_cvtepu8_epi32(chunk);
             _mm256_storeu_si256((__m256i*) pDst, half);
+
+            mask  = _mm_movemask_epi8(chunk);
             chunk = _mm_shuffle_epi32(chunk, _MM_SHUFFLE(1, 0, 3, 2));
             half  = _mm256_cvtepu8_epi32(chunk);
             _mm256_storeu_si256((__m256i*) (pDst + 8), half);
 
-            //- If no bits were set in the mask, then all 16 code units were ASCII, and therefore
-            //  both pointers are advanced by 16.
-            //
             if (mask == 0)
             {
                 pSrc += 16;
                 pDst += 16;
             }
-
-            //- Otherwise, the number of trailing (low-order) zero bits in the mask indicates the number
-            //  of ASCII code units starting from the lowest byte address.
             else
             {
                 incr  = GetTrailingZeros(mask);
                 pSrc += incr;
                 pDst += incr;
             }
-#endif
         }
         else
         {
@@ -1279,55 +1269,28 @@ UtfUtils::ConvertAsciiWithSse(char8_t const*& pSrc, char32_t*& pDst) noexcept
 ///     A reference to a non-null pointer defining the start of the code point output range.
 //--------------------------------------------------------------------------------------------------
 //
-KEWB_FORCE_INLINE
-void
+//KEWB_FORCE_INLINE
+inline void
 UtfUtils::ConvertAsciiWithAvx(char8_t const*& pSrc, char32_t*& pDst) noexcept
 {
-    __m128i     chunk;
     int32_t     mask, incr;
-
-    chunk = _mm_loadu_si128((__m128i const*) pSrc);     //- Load a register with 8-bit bytes
-    mask  = _mm_movemask_epi8(chunk);                   //- Determine which octets have high bit set
-
-#if 0
-    __m128i     half, qrtr, zero;
-    zero  = _mm_set1_epi8(0);                           //- Zero out the interleave register
-    half = _mm_unpacklo_epi8(chunk, zero);              //- Unpack bytes 0-7 into 16-bit words
-    qrtr = _mm_unpacklo_epi16(half, zero);              //- Unpack words 0-3 into 32-bit dwords
-    _mm_storeu_si128((__m128i*) pDst, qrtr);            //- Write to memory
-    qrtr = _mm_unpackhi_epi16(half, zero);              //- Unpack words 4-7 into 32-bit dwords
-    _mm_storeu_si128((__m128i*) (pDst + 4), qrtr);      //- Write to memory
-
-    half = _mm_unpackhi_epi8(chunk, zero);              //- Unpack bytes 8-15 into 16-bit words
-    qrtr = _mm_unpacklo_epi16(half, zero);              //- Unpack words 8-11 into 32-bit dwords
-    _mm_storeu_si128((__m128i*) (pDst + 8), qrtr);      //- Write to memory
-    qrtr = _mm_unpackhi_epi16(half, zero);              //- Unpack words 12-15 into 32-bit dwords
-    _mm_storeu_si128((__m128i*) (pDst + 12), qrtr);     //- Write to memory
-#else
-#if 0
-    __m512i     full;
-    full = _mm512_cvtepu8_epi32(chunk);                 //- Zero-extend the octets.
-    _mm512_storeu_epi32(pDst, full);
-#else
+    __m128i     chunk;
     __m256i     half;
-    half = _mm256_cvtepu8_epi32(chunk);
+
+    chunk = _mm_loadu_si128((__m128i const*) pSrc);
+    half  = _mm256_cvtepu8_epi32(chunk);
     _mm256_storeu_si256((__m256i*) pDst, half);
+
+    mask  = _mm_movemask_epi8(chunk);
     chunk = _mm_shuffle_epi32(chunk, _MM_SHUFFLE(1, 0, 3, 2));
     half  = _mm256_cvtepu8_epi32(chunk);
     _mm256_storeu_si256((__m256i*) (pDst + 8), half);
-#endif
-#endif
-    //- If no bits were set in the mask, then all 16 code units were ASCII, and therefore
-    //  both pointers are advanced by 16.
-    //
+
     if (mask == 0)
     {
         pSrc += 16;
         pDst += 16;
     }
-
-    //- Otherwise, the number of trailing (low-order) zero bits in the mask indicates the number
-    //  of ASCII code units starting from the lowest byte address.
     else
     {
         incr  = GetTrailingZeros(mask);

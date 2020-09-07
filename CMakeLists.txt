@@ -35,7 +35,7 @@ else()
     set(CMAKE_CXX_COMPILER g++)
 endif()
 
-set(AVX_FLAGS "-mavx512f -march=skylake-avx512")
+set(AVX_FLAGS "-mavx2 -march=skylake")
 
 if(CMAKE_CXX_COMPILER STREQUAL clang++)
 
