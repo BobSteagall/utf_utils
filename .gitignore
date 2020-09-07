@@ -1,5 +1,6 @@
 build-*
 cmake-*
+out/
 tmp
 /x64*
 /x86*
@@ -12,4 +13,4 @@ tmp
 *.suo
 *.tmp
 *.vcxproj.user
-~*
+*~

@@ -262,6 +262,24 @@ Convert32_KewbSseBgTab(string const& src, size_t reps, u32string& dst)
     return dstLen;
 }
 
+//--------------
+//
+ptrdiff_t
+Convert32_KewbAvxBgTab(string const& src, size_t reps, u32string& dst)
+{
+    char8_t const*  pSrcBuf = (char8_t const*) &src[0]; //- Pointer to source buffer
+    char8_t const*  pSrcEnd = pSrcBuf + src.size();     //- Pointer to end of source buffer
+    char32_t*       pDstBuf = &dst[0];                  //- Pointer to destination buffer
+    ptrdiff_t       dstLen  = 0;
+
+    for (uint64_t i = 0;  i < reps;  ++i)
+    {
+        dstLen = UtfUtils::AvxBigTableConvert(pSrcBuf, pSrcEnd, pDstBuf);
+    }
+
+    return dstLen;
+}
+
 //--------------------------------------------------------------------------------------------------
 //
 ptrdiff_t

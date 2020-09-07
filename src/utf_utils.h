@@ -113,6 +113,7 @@ class UtfUtils
     static  ptrdiff_t   BasicConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char16_t* pDst) noexcept;
     static  ptrdiff_t   FastConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char16_t* pDst) noexcept;
     static  ptrdiff_t   SseConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char16_t* pDst) noexcept;
+    static  ptrdiff_t   AvxConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char16_t* pDst) noexcept;
 
     //- Conversion to UTF-32/UTF-16 using pre-computed first code unit lookup table.
     //
@@ -124,6 +125,7 @@ class UtfUtils
     static  ptrdiff_t   BasicBigTableConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char16_t* pDst) noexcept;
     static  ptrdiff_t   FastBigTableConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char16_t* pDst) noexcept;
     static  ptrdiff_t   SseBigTableConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char16_t* pDst) noexcept;
+    static  ptrdiff_t   AvxBigTableConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char16_t* pDst) noexcept;
 
     //- Conversion to UTF-32/UTF-16 using small lookup table and masking operations on first code unit.
     //
@@ -459,6 +461,27 @@ KEWB_FORCE_INLINE ptrdiff_t
 UtfUtils::SseConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char16_t* pDst) noexcept
 {
     return SseBigTableConvert(pSrc, pSrcEnd, pDst);
+}
+
+//--------------------------------------------------------------------------------------------------
+/// \brief  Converts a sequence of UTF-8 code units to a sequence of UTF-16 code units.
+///
+/// \param pSrc
+///     A non-null pointer defining the beginning of the code unit input range.
+/// \param pSrcEnd
+///     A non-null past-the-end pointer defining the end of the code unit input range.
+/// \param pDst
+///     A non-null pointer defining the beginning of the code unit output range.
+///
+/// \returns
+///     If successful, the number of UTF-16 code units written; otherwise -1 is returned to
+///     indicate an error was encountered.
+//--------------------------------------------------------------------------------------------------
+//
+KEWB_FORCE_INLINE ptrdiff_t
+UtfUtils::AvxConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char16_t* pDst) noexcept
+{
+    return AvxBigTableConvert(pSrc, pSrcEnd, pDst);
 }
 
 //--------------------------------------------------------------------------------------------------

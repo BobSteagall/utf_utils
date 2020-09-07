@@ -802,6 +802,103 @@ UtfUtils::SseBigTableConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char16
 ///
 /// \details
 ///     This static member function reads an input sequence of UTF-8 code units and converts
+///     it to an output sequence of UTF-32 code points.  It uses the DFA to perform non-ascii
+///     code-unit sequence conversions, but optimizes by converting contiguous sequences of
+///     ASCII code units using SSE intrinsics.  It uses the `AdvanceWithBigTable` member
+///     function to read and convert input.
+///
+/// \param pSrc
+///     A non-null pointer defining the beginning of the code unit input range.
+/// \param pSrcEnd
+///     A non-null past-the-end pointer defining the end of the code unit input range.
+/// \param pDst
+///     A non-null pointer defining the beginning of the code point output range.
+///
+/// \returns
+///     If successful, the number of UTF-32 code points written; otherwise -1 is returned to
+///     indicate an error was encountered.
+//--------------------------------------------------------------------------------------------------
+//
+KEWB_ALIGN_FN std::ptrdiff_t
+UtfUtils::AvxBigTableConvert(char8_t const* pSrc, char8_t const* pSrcEnd, char16_t* pDst) noexcept
+{
+    char16_t*   pDstOrig = pDst;
+    char32_t    cdpt;
+
+    while (pSrc < (pSrcEnd - sizeof(__m128i)))
+    {
+        if (*pSrc < 0x80)
+        {
+            int32_t     mask, incr;
+            __m128i     chunk;
+            __m256i     full;
+
+            chunk = _mm_loadu_si128((__m128i const*) pSrc);
+            full  = _mm256_cvtepu8_epi16(chunk);
+            mask  = _mm_movemask_epi8(chunk);
+
+        #if 0
+            _mm256_storeu_si256((__m256i*) pDst, full);
+        #else
+            chunk = _mm256_castsi256_si128(full);
+            _mm_storeu_si128((__m128i*) pDst, chunk);
+            full  = _mm256_permutevar8x32_epi32(full, _mm256_setr_epi32(4,5,6,7,0,1,2,3));
+            chunk = _mm256_castsi256_si128(full);
+            _mm_storeu_si128((__m128i*) (pDst + 8), chunk);
+        #endif
+
+            if (mask == 0)
+            {
+                pSrc += 16;
+                pDst += 16;
+            }
+            else
+            {
+                incr  = GetTrailingZeros(mask);
+                pSrc += incr;
+                pDst += incr;
+            }
+        }
+        else
+        {
+            if (AdvanceWithBigTable(pSrc, pSrcEnd, cdpt) != ERR)
+            {
+                GetCodeUnits(cdpt, pDst);
+            }
+            else
+            {
+                return -1;
+            }
+        }
+    }
+
+    while (pSrc < pSrcEnd)
+    {
+        if (*pSrc < 0x80)
+        {
+            *pDst++ = *pSrc++;
+        }
+        else
+        {
+            if (AdvanceWithBigTable(pSrc, pSrcEnd, cdpt) != ERR)
+            {
+                GetCodeUnits(cdpt, pDst);
+            }
+            else
+            {
+                return -1;
+            }
+        }
+    }
+
+    return pDst - pDstOrig;
+}
+
+//--------------------------------------------------------------------------------------------------
+/// \brief  Converts a sequence of UTF-8 code units to a sequence of UTF-32 code points.
+///
+/// \details
+///     This static member function reads an input sequence of UTF-8 code units and converts
 ///     it to an output sequence of UTF-32 code points.  It performs conversion by traversing
 ///     the DFA without any optimizations using the `AdvanceWithSmallTable` member function to
 ///     read and convert input.
